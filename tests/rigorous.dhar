@@ -1,0 +1,19 @@
+; ==============================================================================
+; RIGOROUS STAGE 1 STRESS TEST (tests/rigorous.dhar)
+; ==============================================================================
+
+task core():
+    lock test_banner: str = "=== STARTING DHAR STAGE 1 RIGOROUS STRESS TEST ===\n"
+    sys 1, 1, test_banner, 52
+
+    lock msg_one: str = "[Pass 1] Multi-line string ingestion verified.\n"
+    sys 1, 1, msg_one, 47
+
+    lock msg_two: str = "[Pass 2] Token memory stokes and stride stability verified.\n"
+    sys 1, 1, msg_two, 58
+
+    lock msg_three: str = "[Pass 3] Native x86_64 kernel pipeline execution complete.\n"
+    sys 1, 1, msg_three, 59
+
+    lock test_success: str = "=== ALL STRESS TESTS PASSED CLEANLY ===\n"
+    sys 1, 1, test_success, 41

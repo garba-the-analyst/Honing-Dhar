@@ -1,0 +1,3 @@
+task core():
+    lock msg: str = "Hello from Self-Hosted Stage 1!\n"
+    sys 1, 1, msg, 32
