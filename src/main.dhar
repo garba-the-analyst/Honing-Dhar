@@ -1,0 +1,6 @@
+task core():
+    lock version: str = "honing-dhar Stage 1 Compiler v0.1.0\n"
+    sys 1, 1, version, 32
+    
+    lock src: str = "test.dhar"
+    sys 1, 1, src, 10
