@@ -20,7 +20,7 @@ task emit_inferred_var(val: i32):
     lock m1: str = "  ; y=10 inferred\n"
     sys 1, 1, m1, 18
     lock m2: str = "  mov r12, 10\n"
-    sys 1, 1, m2, 13
+    sys 1, 1, m2, 14
 
 task emit_footer():
     lock f1: str = "  ret\n"
