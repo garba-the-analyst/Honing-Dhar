@@ -1,21 +1,28 @@
 task emit_header():
-    lock hdr: str = "section .text\n  global _start\n_start:\n  call core\n"
-    sys 1, 1, hdr, 41
+    lock h1: str = "section .text\n"
+    sys 1, 1, h1, 14
+    lock h2: str = "  global _start\n"
+    sys 1, 1, h2, 16
+    lock h3: str = "_start:\n  call core\n"
+    sys 1, 1, h3, 18
+
+task emit_concise_demo():
+    lock a: str = "  ; x=5 -> flux\n"
+    sys 1, 1, a, 17
+    lock b: str = "  mov r12, 5\n"
+    sys 1, 1, b, 13
+    lock c: str = "  ; x+=1 -> x=x+1\n"
+    sys 1, 1, c, 18
+    lock d: str = "  inc r12\n"
+    sys 1, 1, d, 10
 
 task emit_footer():
-    lock ftr: str = "  mov rax, 60\n  xor rdi, rdi\n  syscall\n"
-    sys 1, 1, ftr, 32
-
-task compile_concise(len: i32):
-    lock m1: str = "Stage 1: desugar x=5 -> flux, x+=1, print\n"
-    sys 1, 1, m1, 37
-    give len
+    lock f: str = "  mov rax,60\n  xor rdi,rdi\n  syscall\n"
+    sys 1, 1, f, 32
 
 task core():
-    lock v: str = "honing-dhar Stage 1 v0.5.0 self-hosting\n"
-    sys 1, 1, v, 36
+    lock v: str = "Stage 1 concise emit OK\n"
+    sys 1, 1, v, 24
     emit_header()
-    compile_concise(0)
+    emit_concise_demo()
     emit_footer()
-    lock done: str = "Stage 1 emit complete\n"
-    sys 1, 1, done, 22
