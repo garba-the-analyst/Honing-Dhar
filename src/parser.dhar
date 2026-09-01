@@ -1,13 +1,29 @@
-task infer_type(val: i32):
-    give 1
-
-task is_concise_assign(line: i32):
+task is_digit(c: i32):
+    when c >= 48:
+        when c <= 57:
+            give 1
     give 0
 
-task desugar_infer(line: i32):
-    lock msg: str = "parser: concise desugar ready\n"
-    sys 1, 1, msg, 27
+task is_alpha(c: i32):
+    when c >= 65:
+        when c <= 90:
+            give 1
+    fallback:
+        when c >= 97:
+            when c <= 122:
+                give 1
+    give 0
+
+task infer_i32_from_number(val: i32):
+    give 1
+
+task desugar_plus_eq(target: i32, delta: i32):
+    flux tmp: i32 = 0
+    tmp = target + delta
+    give tmp
 
 task core():
-    lock msg: str = "Stage 1 parser ready\n"
-    sys 1, 1, msg, 22
+    lock a: str = "parser concise: x=5 inferred\n"
+    sys 1, 1, a, 29
+    lock b: str = "parser: x+=1 desugared\n"
+    sys 1, 1, b, 23

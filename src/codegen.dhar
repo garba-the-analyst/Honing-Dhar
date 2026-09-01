@@ -1,6 +1,13 @@
-task emit_concise(line: i32):
+task alloc_reg_for_var(use_count: i32):
+    when use_count >= 5:
+        give 1
     give 0
 
+task emit_with_ra(reg: i32):
+    when reg == 1:
+        lock m1: str = "  mov r12, \n"
+        sys 1, 1, m1, 11
+
 task core():
-    lock msg: str = "Stage 1 codegen ready\n"
-    sys 1, 1, msg, 23
+    lock msg: str = "codegen RA: r12-r15 for hot locals\n"
+    sys 1, 1, msg, 30
