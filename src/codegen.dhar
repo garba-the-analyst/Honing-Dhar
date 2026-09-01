@@ -1,9 +1,9 @@
-task should_alloc_reg(use_count: i32):
+task should_keep_in_reg(use_count: i32):
     when use_count >= 5:
         give 1
     give 0
 
-task pick_reg_for_hot_var(count: i32):
+task pick_reg(count: i32):
     when count >= 10:
         give 4
     fallback:
@@ -15,7 +15,7 @@ task pick_reg_for_hot_var(count: i32):
             fallback:
                 give 1
 
-task emit_reg_load(reg: i32, val: i32):
+task emit_load_reg(reg: i32, val: i32):
     when reg == 1:
         lock m1: str = "  mov r12, val\n"
         sys 1, 1, m1, 13
@@ -27,11 +27,16 @@ task emit_reg_load(reg: i32, val: i32):
             lock m3: str = "  mov r14, val\n"
             sys 1, 1, m3, 13
 
+task emit_print_uses_reg(reg: i32):
+    when reg == 1:
+        lock m1: str = "  cmp r12, 10\n"
+        sys 1, 1, m1, 12
+
 task core():
-    lock msg: str = "codegen RA: hot vars -> r12-r15\n"
-    sys 1, 1, msg, 28
-    flux c1: i32 = 0
-    c1 = should_alloc_reg(8)
-    when c1 == 1:
-        lock ok: str = "  hot var detected (use=8)\n"
-        sys 1, 1, ok, 26
+    lock msg: str = "codegen RA: r12-r15 hot\n"
+    sys 1, 1, msg, 24
+    flux c: i32 = 0
+    c = should_keep_in_reg(8)
+    when c == 1:
+        lock ok: str = "  hot var -> reg\n"
+        sys 1, 1, ok, 16

@@ -1,7 +1,18 @@
+task desugar_print(len: i32):
+    lock m1: str = "  print(msg) -> sys 1,1,msg,len\n"
+    sys 1, 1, m1, 31
+
+task desugar_task_no_kw(has_task: i32):
+    when has_task == 0:
+        lock m1: str = "  infer task foo(a:i32):\n"
+        sys 1, 1, m1, 27
+        give 1
+    give 0
+
 task core():
     lock v1: str = "honing-dhar Stage 1 v0.4.0\n"
     sys 1, 1, v1, 26
-    lock v2: str = "Concise: x=5, x+=1, print(), foo(a,b):\n"
+    lock v2: str = "Concise: x=5, x+=1, print, foo(a,b):\n"
     sys 1, 1, v2, 37
-    lock v3: str = "No new keywords - desugaring only\n"
-    sys 1, 1, v3, 32
+    desugar_print(5)
+    desugar_task_no_kw(0)
