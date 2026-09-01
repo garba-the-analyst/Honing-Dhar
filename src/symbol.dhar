@@ -1,15 +1,35 @@
-task borrow_view(ptr: i32):
-    lock m1: str = "  view x -> &x (read)\n"
-    sys 1, 1, m1, 20
-    give ptr
+task field_offset_mold(field_idx: i32):
+    flux off: i32 = 0
+    off = field_idx * 8
+    give off
 
-task borrow_grab(ptr: i32):
-    lock m1: str = "  grab x -> &mut x (write)\n"
-    sys 1, 1, m1, 26
-    give ptr
+task add_mold_field(mold_name: i32, field_name: i32, field_type: i32):
+    flux idx: i32 = 0
+    idx = field_offset_mold(0)
+    lock m1: str = "  mold field x at 0\n"
+    sys 1, 1, m1, 19
+    give idx
+
+task handle_each_loop(buf_len: i32):
+    lock m1: str = "  each: for y in buf[0..len]\n"
+    sys 1, 1, m1, 28
+    give buf_len
 
 task core():
-    lock msg: str = "symbol: view/grab borrowing\n"
-    sys 1, 1, msg, 27
-    borrow_view(1)
-    borrow_grab(1)
+    lock msg: str = "symbol: mold field offsets 0,8,16\n"
+    sys 1, 1, msg, 32
+    flux o0: i32 = 0
+    o0 = field_offset_mold(0)
+    flux o1: i32 = 0
+    o1 = field_offset_mold(1)
+    flux o2: i32 = 0
+    o2 = field_offset_mold(2)
+    when o0 == 0:
+        lock ok0: str = "  x @0 OK\n"
+        sys 1, 1, ok0, 10
+    when o1 == 8:
+        lock ok1: str = "  y @8 OK\n"
+        sys 1, 1, ok1, 10
+    when o2 == 16:
+        lock ok2: str = "  z @16 OK\n"
+        sys 1, 1, ok2, 11
