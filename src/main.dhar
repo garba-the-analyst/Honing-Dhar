@@ -1,18 +1,21 @@
-task desugar_print(len: i32):
-    lock m1: str = "  print(msg) -> sys 1,1,msg,len\n"
-    sys 1, 1, m1, 31
+task emit_header():
+    lock hdr: str = "section .text\n  global _start\n_start:\n  call core\n"
+    sys 1, 1, hdr, 41
 
-task desugar_task_no_kw(has_task: i32):
-    when has_task == 0:
-        lock m1: str = "  infer task foo(a:i32):\n"
-        sys 1, 1, m1, 27
-        give 1
-    give 0
+task emit_footer():
+    lock ftr: str = "  mov rax, 60\n  xor rdi, rdi\n  syscall\n"
+    sys 1, 1, ftr, 32
+
+task compile_concise(len: i32):
+    lock m1: str = "Stage 1: desugar x=5 -> flux, x+=1, print\n"
+    sys 1, 1, m1, 37
+    give len
 
 task core():
-    lock v1: str = "honing-dhar Stage 1 v0.4.0\n"
-    sys 1, 1, v1, 26
-    lock v2: str = "Concise: x=5, x+=1, print, foo(a,b):\n"
-    sys 1, 1, v2, 37
-    desugar_print(5)
-    desugar_task_no_kw(0)
+    lock v: str = "honing-dhar Stage 1 v0.5.0 self-hosting\n"
+    sys 1, 1, v, 36
+    emit_header()
+    compile_concise(0)
+    emit_footer()
+    lock done: str = "Stage 1 emit complete\n"
+    sys 1, 1, done, 22
