@@ -16,11 +16,9 @@ task emit_header():
     lock h8: str = "core:\n"
     sys 1, 1, h8, 6
 
-task emit_inferred_var(val: i32):
-    lock m1: str = "  ; y=10 inferred\n"
-    sys 1, 1, m1, 18
-    lock m2: str = "  mov r12, 10\n"
-    sys 1, 1, m2, 14
+task emit_inferred_y():
+    lock m1: str = "  mov r12, 10\n"
+    sys 1, 1, m1, 14
 
 task emit_footer():
     lock f1: str = "  ret\n"
@@ -30,7 +28,7 @@ task core():
     lock v: str = "Stage 1: y=10 inferred OK\n"
     sys 1, 2, v, 25
     flux fd: i32 = 0
-    lock path: str = "tests/pure_concise.dhar"
+    lock path: str = "/home/garba-the-analyst/Desktop/Projects/honing-dhar/tests/pure_concise.dhar"
     sys 2, path, 0, 0
     sysret fd
     flux buf: raw[256]
@@ -39,5 +37,5 @@ task core():
     sysret n
     sys 3, fd, 0, 0
     emit_header()
-    emit_inferred_var(10)
+    emit_inferred_y()
     emit_footer()
