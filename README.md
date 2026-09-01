@@ -1,4 +1,4 @@
-# Honing-Dhar Stage 1
+# Honing-Dhar Stage 1 (V0.4.0-doc self-hosting)
 
 **Stage 1 self-hosted compiler — written in Dhar, compiled by Stage 0 (`forge-of-dhar` V0.4.0-doc).**
 
