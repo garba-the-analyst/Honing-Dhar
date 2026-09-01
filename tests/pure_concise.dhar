@@ -1,0 +1,5 @@
+task core():
+    y = 10
+    y += 1
+    lock msg: str = "pure concise y=10 -> flux inferred\n"
+    sys 1, 1, msg, 31
