@@ -1,0 +1,6 @@
+task emit_concise(line: i32):
+    give 0
+
+task core():
+    lock msg: str = "Stage 1 codegen ready\n"
+    sys 1, 1, msg, 23

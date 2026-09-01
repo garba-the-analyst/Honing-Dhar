@@ -1,6 +1,5 @@
 task core():
-    lock version: str = "honing-dhar Stage 1 Compiler v0.1.0\n"
-    sys 1, 1, version, 32
-    
-    lock src: str = "test.dhar"
-    sys 1, 1, src, 10
+    lock v: str = "honing-dhar Stage 1 v0.1.0 (concise syntax)\n"
+    sys 1, 1, v, 38
+    lock n: str = "Features: x=5 inferred, x+=1, print(msg), task foo(a,b):\n"
+    sys 1, 1, n, 50

@@ -1,45 +1,9 @@
-lock AstNodeType: i32 = 0
-lock AST_PROGRAM: i32 = 1
-lock AST_TASK_DECL: i32 = 2
-lock AST_VAR_DECL: i32 = 3
-lock AST_ASSIGN: i32 = 4
-lock AST_BINARY_OP: i32 = 5
-lock AST_UNARY_OP: i32 = 6
-lock AST_IDENTIFIER: i32 = 7
-lock AST_NUMBER: i32 = 8
-lock AST_STRING: i32 = 9
-lock AST_WHEN: i32 = 10
-lock AST_SPAN: i32 = 11
-lock AST_SYSCALL: i32 = 12
-lock AST_PEEK: i32 = 13
-lock AST_POKE: i32 = 14
-lock AST_SYSRET: i32 = 15
-lock AST_GIVE: i32 = 16
-lock AST_TASK_CALL: i32 = 17
-lock AST_ARRAY_ACCESS: i32 = 18
+task node_type_program():
+    give 1
 
-lock BinOpType: i32 = 0
-lock BIN_ADD: i32 = 1
-lock BIN_SUB: i32 = 2
-lock BIN_MUL: i32 = 3
-lock BIN_DIV: i32 = 4
-lock BIN_MOD: i32 = 5
-lock BIN_EQ: i32 = 6
-lock BIN_NE: i32 = 7
-lock BIN_LT: i32 = 8
-lock BIN_GT: i32 = 9
-lock BIN_LE: i32 = 10
-lock BIN_GE: i32 = 11
-
-lock VarType: i32 = 0
-lock TYPE_I32: i32 = 1
-lock TYPE_STR: i32 = 2
-lock TYPE_RAW: i32 = 3
-
-lock Mutability: i32 = 0
-lock MUT_LOCK: i32 = 1
-lock MUT_FLUX: i32 = 2
+task node_type_task():
+    give 2
 
 task core():
-    lock msg: str = "AST module loaded\n"
-    sys 1, 1, msg, 17
+    lock msg: str = "Stage 1 AST ready\n"
+    sys 1, 1, msg, 18

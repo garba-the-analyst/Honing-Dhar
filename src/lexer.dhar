@@ -1,44 +1,27 @@
-lock TokenType: i32 = 0
-lock TOK_EOF: i32 = 0
-lock TOK_IDENT: i32 = 1
-lock TOK_NUMBER: i32 = 2
-lock TOK_STRING: i32 = 3
+task is_alpha(c: i32):
+    when c >= 65:
+        when c <= 90:
+            give 1
+        fallback:
+            when c >= 97:
+                when c <= 122:
+                    give 1
+    give 0
 
-lock TOK_LOCK: i32 = 10
-lock TOK_FLUX: i32 = 11
-lock TOK_TASK: i32 = 12
-lock TOK_I32: i32 = 13
-lock TOK_STR: i32 = 14
-lock TOK_RAW: i32 = 14
-lock TOK_WHEN: i32 = 15
-lock TOK_SPAN: i32 = 16
-lock TOK_SYS: i32 = 17
-lock TOK_FALLBACK: i32 = 18
-lock TOK_PEEK: i32 = 19
-lock TOK_POKE: i32 = 20
-lock TOK_GIVE: i32 = 21
+task is_digit(c: i32):
+    when c >= 48:
+        when c <= 57:
+            give 1
+    give 0
 
-lock TOK_LPAREN: i32 = 30
-lock TOK_RPAREN: i32 = 31
-lock TOK_LBRACKET: i32 = 32
-lock TOK_RBRACKET: i32 = 33
-lock TOK_COLON: i32 = 34
-lock TOK_COMMA: i32 = 35
-lock TOK_ASSIGN: i32 = 36
-lock TOK_EQ: i32 = 37
-lock TOK_NE: i32 = 38
-lock TOK_LT: i32 = 39
-lock TOK_GT: i32 = 40
-lock TOK_LE: i32 = 41
-lock TOK_GE: i32 = 42
-lock TOK_PLUS: i32 = 43
-lock TOK_MINUS: i32 = 44
-lock TOK_STAR: i32 = 45
-lock TOK_SLASH: i32 = 46
-lock TOK_PERCENT: i32 = 47
-
-lock Token: i32 = 0
+task is_alnum(c: i32):
+    flux a: i32 = 0
+    a = is_alpha(c)
+    when a == 1:
+        give 1
+    a = is_digit(c)
+    give a
 
 task core():
-    lock msg: str = "Lexer module loaded\n"
-    sys 1, 1, msg, 17
+    lock msg: str = "Stage 1 lexer ready\n"
+    sys 1, 1, msg, 19

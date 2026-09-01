@@ -1,0 +1,13 @@
+task infer_type(val: i32):
+    give 1
+
+task is_concise_assign(line: i32):
+    give 0
+
+task desugar_infer(line: i32):
+    lock msg: str = "parser: concise desugar ready\n"
+    sys 1, 1, msg, 27
+
+task core():
+    lock msg: str = "Stage 1 parser ready\n"
+    sys 1, 1, msg, 22

@@ -1,0 +1,3 @@
+task core():
+    lock msg: str = "Stage 1 symbol table ready\n"
+    sys 1, 1, msg, 27
