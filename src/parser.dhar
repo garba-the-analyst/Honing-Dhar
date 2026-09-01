@@ -1,22 +1,39 @@
-task lookup_symbol(name: i32):
+task is_digit(c: i32):
+    when c >= 48:
+        when c <= 57:
+            give 1
     give 0
 
-task infer_flux_for_assign(is_declared: i32, val: i32):
-    when is_declared == 0:
-        lock m: str = "  infer: x=5 -> flux x:i32 = 5\n"
-        sys 1, 1, m, 27
-        give 1
+task handle_choose_subject(val: i32):
+    lock m1: str = "  choose x: -> when chain\n"
+    sys 1, 1, m1, 24
+    give val
+
+task handle_is_branch(val: i32):
+    lock m2: str = "  is 1: -> when x==1:\n"
+    sys 1, 1, m2, 21
+    give val
+
+task handle_attempt_block():
+    lock m3: str = "  attempt: -> push handler\n"
+    sys 1, 1, m3, 27
     give 0
 
-task desugar_task_header(has_task: i32):
-    when has_task == 0:
-        lock m: str = "  infer: foo(a,b): -> task foo(a:i32,b:i32):\n"
-        sys 1, 1, m, 38
-        give 1
+task handle_rescue_block(err: i32):
+    lock m4: str = "  rescue e: -> handler\n"
+    sys 1, 1, m4, 24
+    give err
+
+task handle_ensure_block():
+    lock m5: str = "  ensure: -> finally\n"
+    sys 1, 1, m5, 20
     give 0
 
 task core():
-    lock msg: str = "parser: inference ready\n"
-    sys 1, 1, msg, 24
-    infer_flux_for_assign(0, 5)
-    desugar_task_header(0)
+    lock a1: str = "parser: choose/is/match ready\n"
+    sys 1, 1, a1, 29
+    handle_choose_subject(1)
+    handle_is_branch(1)
+    handle_attempt_block()
+    handle_rescue_block(0)
+    handle_ensure_block()
