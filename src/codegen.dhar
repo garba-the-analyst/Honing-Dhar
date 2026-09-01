@@ -1,12 +1,9 @@
-task should_keep_in_reg(use_count: i32):
-    when use_count >= 5:
-        give 1
-    give 0
-
-task emit_choose_subject(val: i32):
-    lock c1: str = "  ; choose x: subject in r12\n"
-    sys 1, 1, c1, 26
-    give val
+task emit_choose_header(subject: i32):
+    lock c1: str = "  ; choose subject\n"
+    sys 1, 1, c1, 19
+    lock c2: str = "  mov r12, subject\n"
+    sys 1, 1, c2, 19
+    give subject
 
 task emit_is_branch(val: i32):
     lock i1: str = "  cmp r12, 1\n"
@@ -15,20 +12,43 @@ task emit_is_branch(val: i32):
     sys 1, 1, i2, 14
     give val
 
-task emit_attempt_handler():
-    lock a1: str = "  ; attempt: push handler\n"
-    sys 1, 1, a1, 25
+task emit_choose_fallback():
+    lock f1: str = "  ; fallback\n"
+    sys 1, 1, f1, 13
     give 0
 
-task emit_rescue_handler(err: i32):
-    lock r1: str = "  rescue: landing pad\n"
-    sys 1, 1, r1, 22
+task emit_attempt_push():
+    lock a1: str = "  push handler\n"
+    sys 1, 1, a1, 15
+    give 0
+
+task emit_rescue_pad(err: i32):
+    lock r1: str = "rescue_landing:\n"
+    sys 1, 1, r1, 16
     give err
 
+task emit_ensure_block():
+    lock e1: str = "  pop handler\n"
+    sys 1, 1, e1, 14
+    give 0
+
+task emit_each_loop(buf_len: i32):
+    lock m1: str = "  xor r13,r13\n"
+    sys 1, 1, m1, 14
+    lock m2: str = ".L_each:\n"
+    sys 1, 1, m2, 10
+    lock m3: str = "  cmp r13, len\n"
+    sys 1, 1, m3, 15
+    lock m4: str = "  jge done\n"
+    sys 1, 1, m4, 11
+
 task core():
-    lock msg: str = "codegen: choose/is -> cmp/jne, attempt/rescue landing pads\n"
-    sys 1, 1, msg, 55
-    emit_choose_subject(1)
+    lock msg: str = "codegen: choose/attempt/each wired\n"
+    sys 1, 1, msg, 34
+    emit_choose_header(1)
     emit_is_branch(1)
-    emit_attempt_handler()
-    emit_rescue_handler(0)
+    emit_choose_fallback()
+    emit_attempt_push()
+    emit_rescue_pad(0)
+    emit_ensure_block()
+    emit_each_loop(10)
