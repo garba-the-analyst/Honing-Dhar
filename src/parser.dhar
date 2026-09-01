@@ -4,38 +4,27 @@ task is_digit(c: i32):
             give 1
     give 0
 
-task infer_type_from_value(val: i32):
+task infer_and_emit_var(name: i32, val: i32):
+    lock msg: str = "  emit: flux x:i32 = val\n"
+    sys 1, 1, msg, 24
     give 1
 
-task handle_concise_assign(is_declared: i32, has_type: i32, val: i32):
+task handle_concise_assign(is_declared: i32, val: i32):
     when is_declared == 0:
-        lock msg1: str = "  inferred: flux x:i32 = val\n"
-        sys 1, 1, msg1, 26
+        lock m1: str = "infer flux x:i32\n"
+        sys 1, 1, m1, 18
         give 1
-    fallback:
-        when has_type == 0:
-            lock msg2: str = "  inferred: :i32\n"
-            sys 1, 1, msg2, 17
-            give 1
     give 0
 
 task handle_plus_eq(target: i32, delta: i32):
-    flux result: i32 = 0
-    result = target + delta
-    lock msg: str = "  desugared: x+=1 -> x=x+1\n"
-    sys 1, 1, msg, 26
-    give result
-
-task handle_task_infer(has_task_kw: i32):
-    when has_task_kw == 0:
-        lock msg: str = "  inferred: task foo(a:i32,b:i32):\n"
-        sys 1, 1, msg, 33
-        give 1
-    give 0
+    flux tmp: i32 = 0
+    tmp = target + delta
+    lock msg: str = "desugar x+=1\n"
+    sys 1, 1, msg, 15
+    give tmp
 
 task core():
-    lock a: str = "parser: concise inference ready\n"
-    sys 1, 1, a, 30
-    handle_concise_assign(0, 0, 5)
+    lock a: str = "parser: x=5 inferred\n"
+    sys 1, 1, a, 22
+    handle_concise_assign(0, 5)
     handle_plus_eq(5, 1)
-    handle_task_infer(0)
