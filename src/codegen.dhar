@@ -3,40 +3,32 @@ task should_keep_in_reg(use_count: i32):
         give 1
     give 0
 
-task pick_reg(count: i32):
-    when count >= 10:
-        give 4
-    fallback:
-        when count >= 7:
-            give 3
-        fallback:
-            when count >= 5:
-                give 2
-            fallback:
-                give 1
+task emit_choose_subject(val: i32):
+    lock c1: str = "  ; choose x: subject in r12\n"
+    sys 1, 1, c1, 26
+    give val
 
-task emit_load_reg(reg: i32, val: i32):
-    when reg == 1:
-        lock m1: str = "  mov r12, val\n"
-        sys 1, 1, m1, 13
-    fallback:
-        when reg == 2:
-            lock m2: str = "  mov r13, val\n"
-            sys 1, 1, m2, 13
-        fallback:
-            lock m3: str = "  mov r14, val\n"
-            sys 1, 1, m3, 13
+task emit_is_branch(val: i32):
+    lock i1: str = "  cmp r12, 1\n"
+    sys 1, 1, i1, 13
+    lock i2: str = "  jne next_is\n"
+    sys 1, 1, i2, 14
+    give val
 
-task emit_print_uses_reg(reg: i32):
-    when reg == 1:
-        lock m1: str = "  cmp r12, 10\n"
-        sys 1, 1, m1, 12
+task emit_attempt_handler():
+    lock a1: str = "  ; attempt: push handler\n"
+    sys 1, 1, a1, 25
+    give 0
+
+task emit_rescue_handler(err: i32):
+    lock r1: str = "  rescue: landing pad\n"
+    sys 1, 1, r1, 22
+    give err
 
 task core():
-    lock msg: str = "codegen RA: r12-r15 hot\n"
-    sys 1, 1, msg, 24
-    flux c: i32 = 0
-    c = should_keep_in_reg(8)
-    when c == 1:
-        lock ok: str = "  hot var -> reg\n"
-        sys 1, 1, ok, 16
+    lock msg: str = "codegen: choose/is -> cmp/jne, attempt/rescue landing pads\n"
+    sys 1, 1, msg, 55
+    emit_choose_subject(1)
+    emit_is_branch(1)
+    emit_attempt_handler()
+    emit_rescue_handler(0)
