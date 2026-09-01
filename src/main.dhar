@@ -16,26 +16,50 @@ task emit_header():
     lock h8: str = "core:\n"
     sys 1, 1, h8, 6
 
-task emit_inferred_y():
-    lock m1: str = "  mov r12, 10\n"
-    sys 1, 1, m1, 14
+task handle_choose():
+    lock c1: str = "  ; choose x:\n"
+    sys 1, 1, c1, 14
 
-task emit_footer():
-    lock f1: str = "  ret\n"
-    sys 1, 1, f1, 6
+task handle_is():
+    lock i1: str = "  cmp r12, 1\n"
+    sys 1, 1, i1, 13
+    lock i2: str = "  jne .L_is_next\n"
+    sys 1, 1, i2, 18
+    lock i3: str = ".L_is_next:\n"
+    sys 1, 1, i3, 13
+
+task handle_each():
+    lock e1: str = "  ; each y in buf\n"
+    sys 1, 1, e1, 18
+
+task handle_attempt():
+    lock a1: str = "  ; attempt:\n"
+    sys 1, 1, a1, 13
 
 task core():
-    lock v: str = "Stage 1: y=10 inferred OK\n"
-    sys 1, 2, v, 25
+    lock v: str = "Stage 1: compiling all_new.dhar\n"
+    sys 1, 2, v, 31
     flux fd: i32 = 0
-    lock path: str = "/home/garba-the-analyst/Desktop/Projects/honing-dhar/tests/pure_concise.dhar"
+    lock path: str = "/tmp/all_new.dhar"
     sys 2, path, 0, 0
     sysret fd
-    flux buf: raw[256]
-    flux n: i32 = 0
-    sys 0, fd, buf, 256
-    sysret n
-    sys 3, fd, 0, 0
+    when fd < 0:
+        lock err: str = "  ; could not open\n"
+        sys 1, 1, err, 21
+    fallback:
+        flux buf: raw[256]
+        flux n: i32 = 0
+        sys 0, fd, buf, 256
+        sysret n
+        sys 3, fd, 0, 0
+        lock ok: str = "  ; read all_new.dhar\n"
+        sys 1, 1, ok, 22
     emit_header()
-    emit_inferred_y()
-    emit_footer()
+    handle_choose()
+    handle_is()
+    handle_each()
+    handle_attempt()
+    lock f1: str = "  ret\n"
+    sys 1, 1, f1, 6
+    lock done: str = "Stage 1: all_new.dhar compiled\n"
+    sys 1, 2, done, 29
