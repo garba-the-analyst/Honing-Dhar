@@ -1,4 +1,4 @@
-task read_source(path: str):
+task read_file_into_buf(path: str):
     flux fd: i32 = 0
     sys 2, path, 0, 0
     sysret fd
@@ -9,18 +9,19 @@ task read_source(path: str):
     sys 3, fd, 0, 0
     give n
 
-task tokenize_each(line: i32):
-    lock m1: str = "  lex: each y in buf -> y, in, buf\n"
-    sys 1, 1, m1, 31
-    give line
-
-task handle_file_iter(path: str):
-    flux n: i32 = 0
-    n = read_source(path)
-    tokenize_each(n)
-    give n
+task each_file_iter(path: str):
+    flux len: i32 = 0
+    len = read_file_into_buf(path)
+    lock m1: str = "  ; each y in file buf\n"
+    sys 1, 1, m1, 22
+    flux idx: i32 = 0
+    span idx < len:
+        flux y: i32 = 0
+        peek y, path, idx
+        idx = idx + 1
+    give len
 
 task core():
-    lock msg: str = "lexer: file I/O for each y in buf\n"
+    lock msg: str = "lexer: each file iteration ready\n"
     sys 1, 1, msg, 32
-    handle_file_iter(msg)
+    each_file_iter(msg)
