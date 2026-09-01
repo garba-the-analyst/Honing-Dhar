@@ -1,39 +1,25 @@
-task is_digit(c: i32):
-    when c >= 48:
-        when c <= 57:
-            give 1
-    give 0
+task is_mold_decl(line: i32):
+    lock m1: str = "  mold Point { x: i32 }\n"
+    sys 1, 1, m1, 22
+    give line
 
-task handle_choose_subject(val: i32):
-    lock m1: str = "  choose x: -> when chain\n"
-    sys 1, 1, m1, 24
+task is_shift_branch(val: i32):
+    lock m1: str = "  shift x==2: -> elif\n"
+    sys 1, 1, m1, 21
     give val
 
-task handle_is_branch(val: i32):
-    lock m2: str = "  is 1: -> when x==1:\n"
-    sys 1, 1, m2, 21
-    give val
-
-task handle_attempt_block():
-    lock m3: str = "  attempt: -> push handler\n"
-    sys 1, 1, m3, 27
-    give 0
-
-task handle_rescue_block(err: i32):
-    lock m4: str = "  rescue e: -> handler\n"
-    sys 1, 1, m4, 24
-    give err
-
-task handle_ensure_block():
-    lock m5: str = "  ensure: -> finally\n"
-    sys 1, 1, m5, 20
+task handle_state_result(ok: i32):
+    when ok == 1:
+        lock m1: str = "  state ok\n"
+        sys 1, 1, m1, 11
+        give 1
+    lock m2: str = "  state err via trap\n"
+    sys 1, 1, m2, 20
     give 0
 
 task core():
-    lock a1: str = "parser: choose/is/match ready\n"
-    sys 1, 1, a1, 29
-    handle_choose_subject(1)
-    handle_is_branch(1)
-    handle_attempt_block()
-    handle_rescue_block(0)
-    handle_ensure_block()
+    lock msg: str = "parser: mold/shift/state simple\n"
+    sys 1, 1, msg, 30
+    is_mold_decl(1)
+    is_shift_branch(2)
+    handle_state_result(1)
