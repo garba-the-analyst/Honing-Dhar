@@ -1,21 +1,39 @@
-task emit_ensure_always():
-    lock e1: str = "ensure_landing:\n"
-    sys 1, 1, e1, 16
-    lock e2: str = "  ; always runs\n"
-    sys 1, 1, e2, 15
-    lock e3: str = "  pop handler\n"
-    sys 1, 1, e3, 14
-    lock e4: str = "  ret\n"
-    sys 1, 1, e4, 6
+task emit_each_final(buf_len: i32):
+    lock e1: str = "  xor r13, r13\n"
+    sys 1, 1, e1, 15
+    lock e2: str = ".L_each_final:\n"
+    sys 1, 1, e2, 14
+    lock e3: str = "  cmp r13, r12\n"
+    sys 1, 1, e3, 15
+    lock e4: str = "  jge .L_each_done\n"
+    sys 1, 1, e4, 17
+    lock e5: str = "  movzx r12, byte [rsi+r13]\n"
+    sys 1, 1, e5, 27
+    lock e6: str = "  inc r13\n"
+    sys 1, 1, e6, 11
+    lock e7: str = "  jmp .L_each_final\n"
+    sys 1, 1, e7, 19
+    lock e8: str = ".L_each_done:\n"
+    sys 1, 1, e8, 14
+    give buf_len
+
+task emit_attempt_final():
+    lock a1: str = "  push rbp\n"
+    sys 1, 1, a1, 11
+    lock a2: str = "  call setjmp_handler\n"
+    sys 1, 1, a2, 20
     give 0
 
-task emit_attempt_with_ensure():
-    lock a1: str = "  push ensure_addr\n"
-    sys 1, 1, a1, 19
-    give 0
+task emit_rescue_final(err: i32):
+    lock r1: str = "rescue_landing:\n"
+    sys 1, 1, r1, 16
+    lock r2: str = "  mov rdi, rax\n"
+    sys 1, 1, r2, 15
+    give err
 
 task core():
-    lock msg: str = "codegen: ensure always runs\n"
-    sys 1, 1, msg, 28
-    emit_attempt_with_ensure()
-    emit_ensure_always()
+    lock msg: str = "Stage 1 v1.0-honing: each/attempt final\n"
+    sys 1, 1, msg, 38
+    emit_each_final(10)
+    emit_attempt_final()
+    emit_rescue_final(0)
