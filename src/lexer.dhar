@@ -9,21 +9,18 @@ task read_source(path: str):
     sys 3, fd, 0, 0
     give n
 
-task is_space(c: i32):
-    when c == 32:
-        give 1
-    when c == 9:
-        give 1
-    give 0
+task tokenize_each(line: i32):
+    lock m1: str = "  lex: each y in buf -> y, in, buf\n"
+    sys 1, 1, m1, 31
+    give line
 
-task tokenize_concise(c: i32):
-    when c == 43:
-        give 1
-    give 0
+task handle_file_iter(path: str):
+    flux n: i32 = 0
+    n = read_source(path)
+    tokenize_each(n)
+    give n
 
 task core():
-    lock msg: str = "lexer: file I/O + x=5, x+=1 tokenized\n"
-    sys 1, 1, msg, 33
-    flux n: i32 = 0
-    n = read_source(msg)
-    tokenize_concise(43)
+    lock msg: str = "lexer: file I/O for each y in buf\n"
+    sys 1, 1, msg, 32
+    handle_file_iter(msg)

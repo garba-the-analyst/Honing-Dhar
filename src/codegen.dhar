@@ -1,54 +1,41 @@
-task emit_choose_header(subject: i32):
-    lock c1: str = "  ; choose subject\n"
-    sys 1, 1, c1, 19
-    lock c2: str = "  mov r12, subject\n"
-    sys 1, 1, c2, 19
-    give subject
-
-task emit_is_branch(val: i32):
-    lock i1: str = "  cmp r12, 1\n"
-    sys 1, 1, i1, 13
-    lock i2: str = "  jne next_is\n"
-    sys 1, 1, i2, 14
+task emit_match_header(val: i32):
+    lock ma1: str = "  ; match x: pattern\n"
+    sys 1, 1, ma1, 20
+    lock ma2: str = "  mov r12, x\n"
+    sys 1, 1, ma2, 13
     give val
 
-task emit_choose_fallback():
-    lock f1: str = "  ; fallback\n"
-    sys 1, 1, f1, 13
+task emit_match_is(val: i32):
+    lock mi1: str = "  cmp r12, 1\n"
+    sys 1, 1, mi1, 13
+    lock mi2: str = "  je .L_match_arm\n"
+    sys 1, 1, mi2, 17
+    give val
+
+task emit_repeat_start():
+    lock rp1: str = ".L_repeat_start:\n"
+    sys 1, 1, rp1, 16
     give 0
 
-task emit_attempt_push():
-    lock a1: str = "  push handler\n"
-    sys 1, 1, a1, 15
-    give 0
+task emit_repeat_until(cond: i32):
+    lock ru1: str = "  cmp r12, 10\n"
+    sys 1, 1, ru1, 14
+    lock ru2: str = "  jl .L_repeat_start\n"
+    sys 1, 1, ru2, 19
+    give cond
 
-task emit_rescue_pad(err: i32):
-    lock r1: str = "rescue_landing:\n"
-    sys 1, 1, r1, 16
+task emit_raise(err: i32):
+    lock ra1: str = "  ; raise err -> rescue\n"
+    sys 1, 1, ra1, 24
+    lock ra2: str = "  jmp rescue_landing\n"
+    sys 1, 1, ra2, 21
     give err
 
-task emit_ensure_block():
-    lock e1: str = "  pop handler\n"
-    sys 1, 1, e1, 14
-    give 0
-
-task emit_each_loop(buf_len: i32):
-    lock m1: str = "  xor r13,r13\n"
-    sys 1, 1, m1, 14
-    lock m2: str = ".L_each:\n"
-    sys 1, 1, m2, 10
-    lock m3: str = "  cmp r13, len\n"
-    sys 1, 1, m3, 15
-    lock m4: str = "  jge done\n"
-    sys 1, 1, m4, 11
-
 task core():
-    lock msg: str = "codegen: choose/attempt/each wired\n"
-    sys 1, 1, msg, 34
-    emit_choose_header(1)
-    emit_is_branch(1)
-    emit_choose_fallback()
-    emit_attempt_push()
-    emit_rescue_pad(0)
-    emit_ensure_block()
-    emit_each_loop(10)
+    lock msg: str = "codegen: match/repeat/raise wired\n"
+    sys 1, 1, msg, 32
+    emit_match_header(1)
+    emit_match_is(1)
+    emit_repeat_start()
+    emit_repeat_until(10)
+    emit_raise(42)
