@@ -1,39 +1,45 @@
-task emit_each_with_peek(buf_len: i32):
-    lock e1: str = "  ; each y in buf: peek\n"
-    sys 1, 1, e1, 22
-    lock e2: str = "  xor r13, r13\n"
-    sys 1, 1, e2, 15
-    lock e3: str = ".L_each_peek:\n"
-    sys 1, 1, e3, 14
-    lock e4: str = "  cmp r13, len\n"
-    sys 1, 1, e4, 15
-    lock e5: str = "  jge .L_each_done\n"
-    sys 1, 1, e5, 17
-    lock e6: str = "  mov r12b, [buf+r13]\n"
-    sys 1, 1, e6, 21
-    give buf_len
+task emit_match_arm(val: i32):
+    lock m1: str = "  cmp r12, 1\n"
+    sys 1, 1, m1, 13
+    lock m2: str = "  je .L_arm\n"
+    sys 1, 1, m2, 13
+    give val
 
-task emit_attempt_real():
-    lock a1: str = "  ; attempt push\n"
-    sys 1, 1, a1, 17
-    lock a2: str = "  push rescue\n"
-    sys 1, 1, a2, 14
+task emit_repeat_landing():
+    lock r1: str = ".L_repeat:\n"
+    sys 1, 1, r1, 12
     give 0
 
-task emit_rescue_real(err: i32):
-    lock r1: str = "rescue_landing:\n"
-    sys 1, 1, r1, 16
+task emit_until_check(val: i32):
+    lock u1: str = "  cmp r12, 10\n"
+    sys 1, 1, u1, 14
+    lock u2: str = "  jl .L_repeat\n"
+    sys 1, 1, u2, 15
+    give val
+
+task emit_raise_unwind(err: i32):
+    lock ra1: str = "  jmp rescue\n"
+    sys 1, 1, ra1, 15
     give err
 
-task emit_ensure_real():
-    lock e1: str = "ensure_landing:\n"
-    sys 1, 1, e1, 16
-    give 0
+task emit_each_real(buf_len: i32):
+    lock e1: str = "  xor r13,r13\n"
+    sys 1, 1, e1, 14
+    lock e2: str = ".L_each:\n"
+    sys 1, 1, e2, 10
+    lock e3: str = "  cmp r13,len\n"
+    sys 1, 1, e3, 14
+    lock e4: str = "  jge .L_done\n"
+    sys 1, 1, e4, 13
+    lock e5: str = "  mov r12b,[buf+r13]\n"
+    sys 1, 1, e5, 20
+    give buf_len
 
 task core():
-    lock msg: str = "codegen: each->peek, attempt pads\n"
-    sys 1, 1, msg, 34
-    emit_each_with_peek(10)
-    emit_attempt_real()
-    emit_rescue_real(0)
-    emit_ensure_real()
+    lock msg: str = "codegen: match/repeat/raise/each wired\n"
+    sys 1, 1, msg, 36
+    emit_match_arm(1)
+    emit_repeat_landing()
+    emit_until_check(10)
+    emit_raise_unwind(42)
+    emit_each_real(10)
