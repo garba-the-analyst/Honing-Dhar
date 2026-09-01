@@ -1,31 +1,21 @@
-task emit_choose_table(size: i32):
-    lock c1: str = "  ; choose jump table\n"
-    sys 1, 1, c1, 20
-    lock c2: str = "  jmp [table + r12*8]\n"
-    sys 1, 1, c2, 20
-    give size
+task emit_ensure_always():
+    lock e1: str = "ensure_landing:\n"
+    sys 1, 1, e1, 16
+    lock e2: str = "  ; always runs\n"
+    sys 1, 1, e2, 15
+    lock e3: str = "  pop handler\n"
+    sys 1, 1, e3, 14
+    lock e4: str = "  ret\n"
+    sys 1, 1, e4, 6
+    give 0
 
-task emit_match_arm_full(val: i32):
-    lock m1: str = "  cmp r12, 1\n"
-    sys 1, 1, m1, 13
-    lock m2: str = "  je .L_arm1\n"
-    sys 1, 1, m2, 14
-    lock m3: str = "  jmp .L_next\n"
-    sys 1, 1, m3, 13
-    give val
-
-task emit_cross_task_unwind():
-    lock a1: str = "  ; cross-task unwind\n"
-    sys 1, 1, a1, 22
-    lock a2: str = "  mov rdi, rsp\n"
-    sys 1, 1, a2, 15
-    lock a3: str = "  call unwind_stack\n"
-    sys 1, 1, a3, 19
+task emit_attempt_with_ensure():
+    lock a1: str = "  push ensure_addr\n"
+    sys 1, 1, a1, 19
     give 0
 
 task core():
-    lock msg: str = "codegen: jump tables + unwind\n"
-    sys 1, 1, msg, 32
-    emit_choose_table(4)
-    emit_match_arm_full(1)
-    emit_cross_task_unwind()
+    lock msg: str = "codegen: ensure always runs\n"
+    sys 1, 1, msg, 28
+    emit_attempt_with_ensure()
+    emit_ensure_always()
