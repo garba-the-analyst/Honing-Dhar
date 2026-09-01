@@ -1,3 +1,14 @@
+task read_source(path: str):
+    flux fd: i32 = 0
+    sys 2, path, 0, 0
+    sysret fd
+    flux buf: raw[4096]
+    flux n: i32 = 0
+    sys 0, fd, buf, 4096
+    sysret n
+    sys 3, fd, 0, 0
+    give n
+
 task is_space(c: i32):
     when c == 32:
         give 1
@@ -5,35 +16,14 @@ task is_space(c: i32):
         give 1
     give 0
 
-task is_newline(c: i32):
-    when c == 10:
-        give 1
-    when c == 13:
+task tokenize_concise(c: i32):
+    when c == 43:
         give 1
     give 0
-
-task is_alpha(c: i32):
-    when c >= 65:
-        when c <= 90:
-            give 1
-    when c >= 97:
-        when c <= 122:
-            give 1
-    give 0
-
-task is_digit(c: i32):
-    when c >= 48:
-        when c <= 57:
-            give 1
-    give 0
-
-task handle_concise_token(c: i32):
-    lock msg: str = "lex: concise x=5, x+=1, choose/is\n"
-    sys 1, 1, msg, 30
-    give c
 
 task core():
-    lock a: str = "Stage 1 lexer: file I/O + concise\n"
-    sys 1, 1, a, 32
-    flux buf: raw[256]
-    handle_concise_token(43)
+    lock msg: str = "lexer: file I/O + x=5, x+=1 tokenized\n"
+    sys 1, 1, msg, 33
+    flux n: i32 = 0
+    n = read_source(msg)
+    tokenize_concise(43)
