@@ -1,5 +1,7 @@
 task core():
-    lock v: str = "honing-dhar Stage 1 v0.1.0 (concise syntax)\n"
-    sys 1, 1, v, 38
-    lock n: str = "Features: x=5 inferred, x+=1, print(msg), task foo(a,b):\n"
-    sys 1, 1, n, 50
+    lock v1: str = "honing-dhar Stage 1 v0.4.0\n"
+    sys 1, 1, v1, 26
+    lock v2: str = "Concise: x=5, x+=1, print(), foo(a,b):\n"
+    sys 1, 1, v2, 37
+    lock v3: str = "No new keywords - desugaring only\n"
+    sys 1, 1, v3, 32
