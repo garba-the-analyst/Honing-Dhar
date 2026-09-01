@@ -1,11 +1,24 @@
+task is_space(c: i32):
+    when c == 32:
+        give 1
+    when c == 9:
+        give 1
+    give 0
+
+task is_newline(c: i32):
+    when c == 10:
+        give 1
+    when c == 13:
+        give 1
+    give 0
+
 task is_alpha(c: i32):
     when c >= 65:
         when c <= 90:
             give 1
-        fallback:
-            when c >= 97:
-                when c <= 122:
-                    give 1
+    when c >= 97:
+        when c <= 122:
+            give 1
     give 0
 
 task is_digit(c: i32):
@@ -14,14 +27,13 @@ task is_digit(c: i32):
             give 1
     give 0
 
-task is_alnum(c: i32):
-    flux a: i32 = 0
-    a = is_alpha(c)
-    when a == 1:
-        give 1
-    a = is_digit(c)
-    give a
+task handle_concise_token(c: i32):
+    lock msg: str = "lex: concise x=5, x+=1, choose/is\n"
+    sys 1, 1, msg, 30
+    give c
 
 task core():
-    lock msg: str = "Stage 1 lexer ready\n"
-    sys 1, 1, msg, 19
+    lock a: str = "Stage 1 lexer: file I/O + concise\n"
+    sys 1, 1, a, 32
+    flux buf: raw[256]
+    handle_concise_token(43)

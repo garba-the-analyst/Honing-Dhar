@@ -1,0 +1,29 @@
+task lex_file(path: str):
+    lock msg: str = "lex: reading file\n"
+    sys 1, 1, msg, 17
+    give 0
+
+task parse_concise(line: i32):
+    when line == 1:
+        lock m: str = "parse: x=5 inferred\n"
+        sys 1, 1, m, 20
+    give 0
+
+task symbol_lookup(name: i32):
+    give 0
+
+task codegen_with_ra(use_count: i32):
+    when use_count >= 5:
+        lock m: str = "codegen: r12-r15\n"
+        sys 1, 1, m, 18
+    give 0
+
+task core():
+    lock v: str = "honing-dhar Stage 1 compiler v0.6.0\n"
+    sys 1, 1, v, 35
+    lex_file(v)
+    parse_concise(1)
+    symbol_lookup(0)
+    codegen_with_ra(8)
+    lock done: str = "Stage 1 pipeline ready\n"
+    sys 1, 1, done, 22
