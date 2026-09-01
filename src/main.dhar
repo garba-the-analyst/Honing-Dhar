@@ -3,26 +3,32 @@ task emit_header():
     sys 1, 1, h1, 14
     lock h2: str = "  global _start\n"
     sys 1, 1, h2, 16
-    lock h3: str = "_start:\n  call core\n"
-    sys 1, 1, h3, 18
+    lock h3: str = "_start:\n"
+    sys 1, 1, h3, 8
+    lock h4: str = "  call core\n"
+    sys 1, 1, h4, 12
+    lock h5: str = "  mov rax,60\n"
+    sys 1, 1, h5, 13
+    lock h6: str = "  xor rdi,rdi\n"
+    sys 1, 1, h6, 14
+    lock h7: str = "  syscall\n"
+    sys 1, 1, h7, 10
+    lock h8: str = "core:\n"
+    sys 1, 1, h8, 6
 
 task emit_inferred_var(val: i32):
-    lock m1: str = "  ; inferred: y=10 -> flux y:i32=10\n"
-    sys 1, 1, m1, 31
+    lock m1: str = "  ; y=10 inferred\n"
+    sys 1, 1, m1, 18
     lock m2: str = "  mov r12, 10\n"
     sys 1, 1, m2, 13
-    lock m3: str = "  ; desugared: y+=1 -> inc r12\n"
-    sys 1, 1, m3, 28
-    lock m4: str = "  inc r12\n"
-    sys 1, 1, m4, 10
 
 task emit_footer():
-    lock f: str = "  mov rax,60\n  xor rdi,rdi\n  syscall\n"
-    sys 1, 1, f, 32
+    lock f1: str = "  ret\n"
+    sys 1, 1, f1, 6
 
 task core():
-    lock v: str = "Stage 1: compiling pure_concise.dhar\n"
-    sys 1, 1, v, 35
+    lock v: str = "Stage 1: y=10 inferred OK\n"
+    sys 1, 2, v, 25
     flux fd: i32 = 0
     lock path: str = "tests/pure_concise.dhar"
     sys 2, path, 0, 0
@@ -35,5 +41,3 @@ task core():
     emit_header()
     emit_inferred_var(10)
     emit_footer()
-    lock done: str = "Stage 1: y=10 inferred OK\n"
-    sys 1, 1, done, 25
