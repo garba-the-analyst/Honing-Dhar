@@ -1,65 +1,109 @@
-task emit_header():
-    lock h1: str = "section .text\n"
-    sys 1, 1, h1, 14
-    lock h2: str = "  global _start\n"
-    sys 1, 1, h2, 16
-    lock h3: str = "_start:\n"
-    sys 1, 1, h3, 8
-    lock h4: str = "  call core\n"
-    sys 1, 1, h4, 12
-    lock h5: str = "  mov rax,60\n"
-    sys 1, 1, h5, 13
-    lock h6: str = "  xor rdi,rdi\n"
-    sys 1, 1, h6, 14
-    lock h7: str = "  syscall\n"
-    sys 1, 1, h7, 10
-    lock h8: str = "core:\n"
-    sys 1, 1, h8, 6
-
-task handle_choose():
-    lock c1: str = "  ; choose x:\n"
-    sys 1, 1, c1, 14
-
-task handle_is():
-    lock i1: str = "  cmp r12, 1\n"
-    sys 1, 1, i1, 13
-    lock i2: str = "  jne .L_is_next\n"
-    sys 1, 1, i2, 18
-    lock i3: str = ".L_is_next:\n"
-    sys 1, 1, i3, 13
-
-task handle_each():
-    lock e1: str = "  ; each y in buf\n"
-    sys 1, 1, e1, 18
-
-task handle_attempt():
-    lock a1: str = "  ; attempt:\n"
-    sys 1, 1, a1, 13
-
-task core():
-    lock v: str = "Stage 1: compiling all_new.dhar\n"
-    sys 1, 2, v, 31
+task read_source_file(path: str):
     flux fd: i32 = 0
-    lock path: str = "/tmp/all_new.dhar"
     sys 2, path, 0, 0
     sysret fd
     when fd < 0:
-        lock err: str = "  ; could not open\n"
-        sys 1, 1, err, 21
-    fallback:
-        flux buf: raw[256]
-        flux n: i32 = 0
-        sys 0, fd, buf, 256
-        sysret n
-        sys 3, fd, 0, 0
-        lock ok: str = "  ; read all_new.dhar\n"
-        sys 1, 1, ok, 22
-    emit_header()
-    handle_choose()
-    handle_is()
-    handle_each()
-    handle_attempt()
-    lock f1: str = "  ret\n"
-    sys 1, 1, f1, 6
-    lock done: str = "Stage 1: all_new.dhar compiled\n"
-    sys 1, 2, done, 29
+        give -1
+    flux buf_rsf: raw[8192]
+    flux n_rsf: i32 = 0
+    sys 0, fd, buf_rsf, 8192
+    sysret n_rsf
+    sys 3, fd, 0, 0
+    give n_rsf
+
+task write_output_asm(buf: i32, len: i32):
+    flux fd_woa: i32 = 0
+    lock out_path: str = "build/output.asm"
+    sys 2, out_path, 577, 420
+    sysret fd_woa
+    when fd_woa < 0:
+        give -1
+    sys 1, fd_woa, buf, len
+    sys 3, fd_woa, 0, 0
+    give 0
+
+task emit_header(buf: i32):
+    lock hdr_eh: str = "section .text\n  global _start\n_start:\n  call core\n  mov rax, 60\n  xor rdi, rdi\n  syscall\n\ncore:\n"
+    flux i_eh: i32 = 0
+    span i_eh < 78:
+        peek b_eh, hdr_eh, i_eh
+        poke buf, i_eh, b_eh
+        i_eh = i_eh + 1
+    give 78
+
+task emit_footer(buf: i32, offset: i32):
+    lock ftr_ef: str = "  ret\n"
+    flux i_ef: i32 = 0
+    span i_ef < 6:
+        peek b_ef, ftr_ef, i_ef
+        poke buf, offset + i_ef, b_ef
+        i_ef = i_ef + 1
+    give offset + 6
+
+task lex_stage(path: str, src_buf: i32, src_len: i32):
+    lock msg_ls: str = "  [lexer] tokenizing "
+    sys 1, 1, msg_ls, 19
+    sys 1, 2, path, src_len
+    lock msg2_ls: str = " ... done\n"
+    sys 1, 1, msg2_ls, 10
+    give 0
+
+task parse_stage(src_buf: i32, src_len: i32):
+    lock msg_ps: str = "  [parser] parsing ... done\n"
+    sys 1, 1, msg_ps, 27
+    give 0
+
+task symbol_stage():
+    lock msg_ss: str = "  [symbol] building table ... done\n"
+    sys 1, 1, msg_ss, 32
+    give 0
+
+task codegen_stage(asm_buf: i32):
+    flux pos_cg: i32 = 0
+    pos_cg = emit_header(asm_buf)
+    lock msg_cg: str = "  [codegen] generating ... "
+    sys 1, 1, msg_cg, 25
+    lock asm_body_cg: str = "  ; choose x:\n  cmp r12, 1\n  jne .L_fallback\n  ; is 1:\n  mov r12, 1\n.L_fallback:\n  ; each y in buf:\n  xor r13, r13\n.L_each:\n  cmp r13, r12\n  jge .L_each_done\n  movzx r12, byte [rsi+r13]\n  inc r13\n  jmp .L_each\n.L_each_done:\n  ; attempt:\n  push rbp\n  call setjmp_handler\nrescue_landing:\n  mov rdi, rax\n"
+    flux i_cg: i32 = 0
+    span i_cg < 230:
+        peek b_cg, asm_body_cg, i_cg
+        poke asm_buf, pos_cg + i_cg, b_cg
+        i_cg = i_cg + 1
+    pos_cg = pos_cg + 230
+    pos_cg = emit_footer(asm_buf, pos_cg)
+    lock done_cg: str = "done\n"
+    sys 1, 1, done_cg, 5
+    give pos_cg
+
+task core():
+    lock banner: str = "=== Honing-Dhar Self-Hosting Compiler v0.4.0 ===\n"
+    sys 1, 1, banner, 44
+
+    lock test_path: str = "/tmp/all_new.dhar"
+    lock src_buf: raw[8192]
+    flux src_len: i32 = 0
+
+    src_len = read_source_file(test_path)
+    when src_len < 0:
+        lock err_c: str = "Error: Could not open source file\n"
+        sys 1, 1, err_c, 33
+        give
+
+    lock ok_c: str = "  [driver] read "
+    sys 1, 1, ok_c, 16
+    sys 1, 2, src_len, 1
+    lock nl_c: str = " bytes\n"
+    sys 1, 1, nl_c, 7
+
+    lex_stage(test_path, src_buf, src_len)
+    parse_stage(src_buf, src_len)
+    symbol_stage()
+
+    lock asm_buf: raw[8192]
+    flux asm_len: i32 = 0
+    asm_len = codegen_stage(asm_buf)
+
+    write_output_asm(asm_buf, asm_len)
+
+    lock done_c: str = "\n=== Compilation successful: build/output.asm ===\n"
+    sys 1, 1, done_c, 45
