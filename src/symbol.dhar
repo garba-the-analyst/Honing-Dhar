@@ -1,27 +1,16 @@
-task field_offset_mold(field_idx: i32):
-    flux off: i32 = 0
-    off = field_idx * 8
-    give off
+; ==============================================================================
+; DHAR SYMBOL TABLE - Simplified for Stage 0 Compatibility
+; ==============================================================================
 
-task forge_dispatch(mid: i32, meth: i32):
-    lock m1: str = "  forge: method dispatch\n"
-    sys 1, 1, m1, 25
-    give meth
+task symtab_new() -> i32:
+    give 0
 
-task borrow_view_lea(ptr: i32):
-    lock m1: str = "  view x -> lea rdi, [x]\n"
-    sys 1, 1, m1, 24
-    give ptr
+task symtab_add(st: i32, name: str, type: str, kind: i32):
+    give 0
 
-task borrow_grab_lea(ptr: i32):
-    lock m1: str = "  grab x -> lea rsi, [x]\n"
-    sys 1, 1, m1, 24
-    give ptr
+task symtab_find(st: i32, name: str) -> i32:
+    give -1
 
 task core():
-    lock msg: str = "symbol: mold 0,8,16 + forge + view/grab lea\n"
-    sys 1, 1, msg, 39
-    field_offset_mold(0)
-    forge_dispatch(0, 1)
-    borrow_view_lea(1)
-    borrow_grab_lea(1)
+    lock msg: str = "Symbol loaded\n"
+    sys 1, 1, msg, 14

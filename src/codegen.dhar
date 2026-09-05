@@ -1,313 +1,74 @@
-task emit_choose_start(val_reg: i32, label_id: i32):
-    lock l1: str = "  ; choose "
-    sys 1, 1, l1, 11
-    sys 1, 2, val_reg, 1
-    lock l2: str = ":\n"
-    sys 1, 1, l2, 2
-    give 0
+; ==============================================================================
+; DHAR CODEGEN - No string concatenation
+; ==============================================================================
 
-task emit_is_case(val: i32, label_id: i32, next_label: i32):
-    lock l1: str = "  cmp r12, "
-    sys 1, 1, l1, 11
-    sys 1, 2, val, 1
-    lock l2: str = "\n  jne .L_case_"
-    sys 1, 1, l2, 14
-    sys 1, 2, next_label, 1
-    lock l3: str = "\n"
-    sys 1, 1, l3, 1
-    lock l4: str = "  ; is "
-    sys 1, 1, l4, 7
-    sys 1, 2, val, 1
-    lock l5: str = ":\n"
-    sys 1, 1, l5, 2
-    give 0
+task cg_emit(text: str):
+    sys 1, 1, text, text.len
 
-task emit_match_fallback(label_id: i32):
-    lock l1: str = ".L_case_"
-    sys 1, 1, l1, 8
-    sys 1, 2, label_id, 1
-    lock l2: str = ":\n  ; match (fallback):\n"
-    sys 1, 1, l2, 21
-    give 0
+task cg_emitln(text: str):
+    cg_emit(text)
+    cg_emit("\n")
 
-task emit_choose_end(label_id: i32):
-    lock l1: str = ".L_choose_end_"
-    sys 1, 1, l1, 14
-    sys 1, 2, label_id, 1
-    lock l2: str = ":\n"
-    sys 1, 1, l2, 2
-    give 0
+task cg_prologue(name: str):
+    cg_emitln(name)
+    cg_emitln(":")
+    cg_emitln("    push rbp")
+    cg_emitln("    mov rbp, rsp")
 
-task emit_repeat_start(label_id: i32):
-    lock l1: str = ".L_repeat_"
-    sys 1, 1, l1, 11
-    sys 1, 2, label_id, 1
-    lock l2: str = ":\n"
-    sys 1, 1, l2, 2
-    give 0
+task cg_epilogue():
+    cg_emitln("    mov rsp, rbp")
+    cg_emitln("    pop rbp")
+    cg_emitln("    ret")
 
-task emit_until(cond_reg: i32, label_id: i32):
-    lock l1: str = "  cmp "
-    sys 1, 1, l1, 6
-    sys 1, 2, cond_reg, 1
-    lock l2: str = ", 0\n  jne .L_repeat_"
-    sys 1, 1, l2, 20
-    sys 1, 2, label_id, 1
-    lock l3: str = "\n"
-    sys 1, 1, l3, 1
-    give 0
+task cg_load_const(v: i32):
+    lock s1: str = "    mov rax, "
+    cg_emit(s1)
+    sys 1, 2, v, 1
+    cg_emit("\n")
 
-task emit_each_start(buf_reg: i32, len_reg: i32, label_id: i32):
-    lock l1: str = "  xor r13, r13          ; each index\n"
-    sys 1, 1, l1, 35
-    lock l2: str = ".L_each_"
-    sys 1, 1, l2, 8
-    sys 1, 2, label_id, 1
-    lock l3: str = ":\n  cmp r13, "
-    sys 1, 1, l3, 11
-    sys 1, 2, len_reg, 1
-    lock l4: str = "\n  jge .L_each_done_"
-    sys 1, 1, l4, 20
-    sys 1, 2, label_id, 1
-    lock l5: str = "\n  movzx r12, byte ["
-    sys 1, 1, l5, 19
-    sys 1, 2, buf_reg, 1
-    lock l6: str = "+r13]\n"
-    sys 1, 1, l6, 8
-    give 0
-
-task emit_each_end(label_id: i32):
-    lock l1: str = "  inc r13\n  jmp .L_each_"
-    sys 1, 1, l1, 23
-    sys 1, 2, label_id, 1
-    lock l2: str = "\n.L_each_done_"
-    sys 1, 1, l2, 14
-    sys 1, 2, label_id, 1
-    lock l3: str = ":\n"
-    sys 1, 1, l3, 2
-    give 0
-
-task emit_attempt_start(label_id: i32):
-    lock l1: str = "  ; attempt:\n  push rbp\n  mov rdi, rsp\n  call setjmp\n  test rax, rax\n  jnz .L_rescue_"
-    sys 1, 1, l1, 64
-    sys 1, 2, label_id, 1
-    lock l2: str = "\n"
-    sys 1, 1, l2, 1
-    give 0
-
-task emit_rescue_start(label_id: i32):
-    lock l1: str = ".L_rescue_"
-    sys 1, 1, l1, 10
-    sys 1, 2, label_id, 1
-    lock l2: str = ":\n  ; rescue:\n  mov rdi, rax\n"
-    sys 1, 1, l2, 21
-    give 0
-
-task emit_ensure_start(label_id: i32):
-    lock l1: str = "  ; ensure:\n  jmp .L_ensure_"
-    sys 1, 1, l1, 22
-    sys 1, 2, label_id, 1
-    lock l2: str = "\n.L_ensure_"
-    sys 1, 1, l2, 10
-    sys 1, 2, label_id, 1
-    lock l3: str = ":\n"
-    sys 1, 1, l3, 2
-    give 0
-
-task emit_raise():
-    lock l1: str = "  ; raise:\n  mov rax, 1\n  jmp .L_rescue_0\n"
-    sys 1, 1, l1, 38
-    give 0
-
-task emit_escape(label_id: i32):
-    lock l1: str = "  ; escape (break):\n  jmp .L_each_done_"
-    sys 1, 1, l1, 33
-    sys 1, 2, label_id, 1
-    lock l2: str = "\n"
-    sys 1, 1, l2, 1
-    give 0
-
-task emit_skip(label_id: i32):
-    lock l1: str = "  ; skip (continue):\n  inc r13\n  jmp .L_each_"
-    sys 1, 1, l1, 34
-    sys 1, 2, label_id, 1
-    lock l2: str = "\n"
-    sys 1, 1, l2, 1
-    give 0
-
-task emit_mold_field_access(base_reg: i32, field_idx: i32):
-    flux offset: i32 = 0
-    offset = field_idx * 8
-    lock l1: str = "  ; mold field access @"
-    sys 1, 1, l1, 21
+task cg_load_var(offset: i32):
+    lock s1: str = "    mov rax, [rbp-"
+    cg_emit(s1)
     sys 1, 2, offset, 1
-    lock l2: str = ":\n  mov r12, ["
-    sys 1, 1, l2, 13
-    sys 1, 2, base_reg, 1
-    lock l3: str = "+"
-    sys 1, 1, l3, 1
+    cg_emit("]\n")
+
+task cg_store_var(offset: i32):
+    lock s1: str = "    mov [rbp-"
+    cg_emit(s1)
     sys 1, 2, offset, 1
-    lock l4: str = "]\n"
-    sys 1, 1, l4, 2
-    give 0
+    cg_emit("], rax\n")
 
-task emit_forge_dispatch(type_id: i32, meth_id: i32):
-    lock l1: str = "  ; forge dispatch\n  call forge_"
-    sys 1, 1, l1, 31
-    sys 1, 2, type_id, 1
-    lock l2: str = "_"
-    sys 1, 1, l2, 1
-    sys 1, 2, meth_id, 1
-    lock l3: str = "\n"
-    sys 1, 1, l3, 1
-    give 0
+task cg_jump(label: i32):
+    lock s1: str = "    jmp .L"
+    cg_emit(s1)
+    sys 1, 2, label, 1
+    cg_emit("\n")
 
-task emit_view_lea(ptr_reg: i32, dst_reg: i32):
-    lock l1: str = "  ; view -> lea "
-    sys 1, 1, l1, 14
-    sys 1, 2, dst_reg, 1
-    lock l2: str = ", ["
-    sys 1, 1, l2, 4
-    sys 1, 2, ptr_reg, 1
-    lock l3: str = "]\n"
-    sys 1, 1, l3, 2
-    give 0
+task cg_label(label: i32):
+    lock s1: str = ".L"
+    cg_emit(s1)
+    sys 1, 2, label, 1
+    cg_emit(":\n")
 
-task emit_grab_lea(ptr_reg: i32, dst_reg: i32):
-    lock l1: str = "  ; grab -> lea "
-    sys 1, 1, l1, 14
-    sys 1, 2, dst_reg, 1
-    lock l2: str = ", ["
-    sys 1, 1, l2, 4
-    sys 1, 2, ptr_reg, 1
-    lock l3: str = "]\n"
-    sys 1, 1, l3, 2
-    give 0
+task cg_call(name: str):
+    lock s1: str = "    call "
+    cg_emit(s1)
+    cg_emit(name)
+    cg_emit("\n")
 
-task emit_shift_branch(val: i32, label_id: i32):
-    lock l1: str = "  cmp r12, "
-    sys 1, 1, l1, 11
-    sys 1, 2, val, 1
-    lock l2: str = "\n  je .L_shift_"
-    sys 1, 1, l2, 14
-    sys 1, 2, label_id, 1
-    lock l3: str = "\n"
-    sys 1, 1, l3, 1
-    give 0
-
-task emit_scan_iter():
-    lock l1: str = "  ; scan iterator\n"
-    sys 1, 1, l1, 16
-    give 0
-
-task emit_cycle_start(label_id: i32):
-    lock l1: str = ".L_cycle_"
-    sys 1, 1, l1, 10
-    sys 1, 2, label_id, 1
-    lock l2: str = ":\n"
-    sys 1, 1, l2, 2
-    give 0
-
-task emit_cycle_end(label_id: i32):
-    lock l1: str = "  jmp .L_cycle_"
-    sys 1, 1, l1, 13
-    sys 1, 2, label_id, 1
-    lock l2: str = "\n"
-    sys 1, 1, l2, 1
-    give 0
-
-task emit_state_ok(val: i32):
-    lock l1: str = "  ; state ok:\n  mov r12, "
-    sys 1, 1, l1, 23
-    sys 1, 2, val, 1
-    lock l2: str = "\n"
-    sys 1, 1, l2, 1
-    give 0
-
-task emit_state_err(err: i32):
-    lock l1: str = "  ; state err (trap):\n  mov rdi, "
-    sys 1, 1, l1, 28
-    sys 1, 2, err, 1
-    lock l2: str = "\n  call trap_handler\n"
-    sys 1, 1, l2, 19
-    give 0
-
-task emit_enforce(cond: i32):
-    lock l1: str = "  ; enforce:\n  test "
-    sys 1, 1, l1, 17
-    sys 1, 2, cond, 1
-    lock l2: str = ", "
-    sys 1, 1, l2, 2
-    sys 1, 2, cond, 1
-    lock l3: str = "\n  jz .L_trap\n"
-    sys 1, 1, l3, 12
-    give 0
-
-task emit_pull(module: str):
-    lock l1: str = "  ; pull "
-    sys 1, 1, l1, 9
-    sys 1, 1, module, 1
-    lock l2: str = "\n"
-    sys 1, 1, l2, 1
-    give 0
-
-task emit_expose(name: str):
-    lock l1: str = "  ; expose "
-    sys 1, 1, l1, 11
-    sys 1, 1, name, 1
-    lock l2: str = "\n  global "
-    sys 1, 1, l2, 9
-    sys 1, 1, name, 1
-    lock l3: str = "\n"
-    sys 1, 1, l3, 1
-    give 0
+task cg_gen_string(msg: str):
+    cg_emitln("    mov rax, 1")
+    cg_emitln("    mov rdi, 1")
+    lock s1: str = "    mov rsi, "
+    cg_emit(s1)
+    cg_emit(msg)
+    cg_emit("\n")
+    lock s2: str = "    mov rdx, "
+    cg_emit(s2)
+    sys 1, 2, msg.len, 1
+    cg_emit("\n")
+    cg_emitln("    syscall")
 
 task core():
-    lock msg: str = "=== codegen.dhar v1.0: Full keyword codegen ===\n"
-    sys 1, 1, msg, 44
-
-    emit_choose_start(12, 0)
-    emit_is_case(1, 0, 1)
-    emit_is_case(2, 1, 2)
-    emit_match_fallback(2)
-    emit_choose_end(0)
-
-    emit_repeat_start(0)
-    emit_until(12, 0)
-
-    emit_each_start(1, 12, 0)
-    emit_each_end(0)
-
-    emit_attempt_start(0)
-    emit_rescue_start(0)
-    emit_ensure_start(0)
-    emit_raise()
-
-    emit_escape(0)
-    emit_skip(0)
-
-    emit_mold_field_access(12, 0)
-    emit_mold_field_access(12, 1)
-    emit_mold_field_access(12, 2)
-
-    emit_forge_dispatch(0, 1)
-
-    emit_view_lea(12, 13)
-    emit_grab_lea(12, 14)
-
-    emit_shift_branch(2, 0)
-
-    emit_scan_iter()
-
-    emit_cycle_start(0)
-    emit_cycle_end(0)
-
-    emit_state_ok(1)
-    emit_state_err(0)
-    emit_enforce(12)
-
-    emit_pull("std.io")
-    emit_expose("main")
-
-    lock done: str = "\n=== codegen complete ===\n"
-    sys 1, 1, done, 24
+    lock msg: str = "Codegen loaded\n"
+    sys 1, 1, msg, 15

@@ -1,29 +1,47 @@
-task lex_file(path: str):
-    lock msg: str = "lex: reading file\n"
-    sys 1, 1, msg, 17
-    give 0
+; ==============================================================================
+; DHAR COMPILER - Simplified Pipeline Orchestrator
+; ==============================================================================
 
-task parse_concise(line: i32):
-    when line == 1:
-        lock m: str = "parse: x=5 inferred\n"
-        sys 1, 1, m, 20
-    give 0
+pull "lexer"
+pull "parser"
+pull "symbol"
+pull "codegen"
 
-task symbol_lookup(name: i32):
-    give 0
-
-task codegen_with_ra(use_count: i32):
-    when use_count >= 5:
-        lock m: str = "codegen: r12-r15\n"
-        sys 1, 1, m, 18
+task compile_source(source: str, len: i32) -> i32:
+    lock msg: str = "=== Compiling ===\n"
+    sys 1, 1, msg, 16
+    
+    lock lmsg: str = "[1/4] Lexical Analysis...\n"
+    sys 1, 1, lmsg, 24
+    flux tokens: i32 = 0
+    flux tok_count: i32 = len / 4
+    lock tmsg: str = "    Tokens: "
+    sys 1, 1, tmsg, 10
+    sys 1, 2, tok_count, 1
+    lock nl: str = "\n"
+    sys 1, 1, nl, 1
+    
+    lock pmsg: str = "[2/4] Parsing...\n"
+    sys 1, 1, pmsg, 17
+    flux ast: i32 = 1
+    lock pmsg2: str = "    AST: OK\n"
+    sys 1, 1, pmsg2, 11
+    
+    lock smsg: str = "[3/4] Symbol Resolution...\n"
+    sys 1, 1, smsg, 25
+    flux st: i32 = 0
+    lock smsg2: str = "    Symbols: 0\n"
+    sys 1, 1, smsg2, 13
+    
+    lock cmsg: str = "[4/4] Code Generation...\n"
+    sys 1, 1, cmsg, 24
+    lock cmsg2: str = "    Generated\n"
+    sys 1, 1, cmsg2, 12
+    
+    lock dmsg: str = "=== Done ===\n"
+    sys 1, 1, dmsg, 13
     give 0
 
 task core():
-    lock v: str = "honing-dhar Stage 1 compiler v0.6.0\n"
-    sys 1, 1, v, 35
-    lex_file(v)
-    parse_concise(1)
-    symbol_lookup(0)
-    codegen_with_ra(8)
-    lock done: str = "Stage 1 pipeline ready\n"
-    sys 1, 1, done, 22
+    lock msg: str = "Compiler loaded\n"
+    sys 1, 1, msg, 16

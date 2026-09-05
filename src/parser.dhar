@@ -1,25 +1,10 @@
-task is_mold_decl(line: i32):
-    lock m1: str = "  mold Point { x: i32 }\n"
-    sys 1, 1, m1, 22
-    give line
+; ==============================================================================
+; DHAR PARSER - Simplified for Stage 0 Compatibility
+; ==============================================================================
 
-task is_shift_branch(val: i32):
-    lock m1: str = "  shift x==2: -> elif\n"
-    sys 1, 1, m1, 21
-    give val
-
-task handle_state_result(ok: i32):
-    when ok == 1:
-        lock m1: str = "  state ok\n"
-        sys 1, 1, m1, 11
-        give 1
-    lock m2: str = "  state err via trap\n"
-    sys 1, 1, m2, 20
+task parse(tokens: i32, count: i32) -> i32:
     give 0
 
 task core():
-    lock msg: str = "parser: mold/shift/state simple\n"
-    sys 1, 1, msg, 30
-    is_mold_decl(1)
-    is_shift_branch(2)
-    handle_state_result(1)
+    lock msg: str = "Parser loaded\n"
+    sys 1, 1, msg, 14

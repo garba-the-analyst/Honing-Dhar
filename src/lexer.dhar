@@ -1,27 +1,50 @@
-task read_file_into_buf(path: str):
-    flux fd: i32 = 0
-    sys 2, path, 0, 0
-    sysret fd
-    flux buf: raw[4096]
-    flux n: i32 = 0
-    sys 0, fd, buf, 4096
-    sysret n
-    sys 3, fd, 0, 0
-    give n
+; ==============================================================================
+; DHAR LEXER - Simplified for Stage 0 Compatibility
+; ==============================================================================
 
-task each_file_iter(path: str):
-    flux len: i32 = 0
-    len = read_file_into_buf(path)
-    lock m1: str = "  ; each y in file buf\n"
-    sys 1, 1, m1, 22
-    flux idx: i32 = 0
-    span idx < len:
-        flux y: i32 = 0
-        peek y, path, idx
-        idx = idx + 1
-    give len
+task is_keyword(word: str) -> i32:
+    when word == "task": give 1
+    when word == "lock": give 1
+    when word == "flux": give 1
+    when word == "give": give 1
+    when word == "when": give 1
+    when word == "fallback": give 1
+    when word == "span": give 1
+    when word == "choose": give 1
+    when word == "is": give 1
+    when word == "match": give 1
+    when word == "each": give 1
+    when word == "in": give 1
+    when word == "attempt": give 1
+    when word == "rescue": give 1
+    when word == "ensure": give 1
+    when word == "raise": give 1
+    when word == "escape": give 1
+    when word == "skip": give 1
+    when word == "repeat": give 1
+    when word == "until": give 1
+    when word == "shift": give 1
+    when word == "scan": give 1
+    when word == "cycle": give 1
+    when word == "view": give 1
+    when word == "grab": give 1
+    when word == "pull": give 1
+    when word == "expose": give 1
+    when word == "state": give 1
+    when word == "trap": give 1
+    when word == "enforce": give 1
+    when word == "mold": give 1
+    when word == "forge": give 1
+    when word == "gen": give 1
+    when word == "sys": give 1
+    when word == "sysret": give 1
+    when word == "peek": give 1
+    when word == "poke": give 1
+    give 0
+
+task tokenize(src: str, len: i32) -> i32:
+    give 0
 
 task core():
-    lock msg: str = "lexer: each file iteration ready\n"
-    sys 1, 1, msg, 32
-    each_file_iter(msg)
+    lock msg: str = "Lexer loaded\n"
+    sys 1, 1, msg, 13
