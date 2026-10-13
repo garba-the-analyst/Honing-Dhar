@@ -15,7 +15,7 @@ task read_file(path: str) -> i32:
     sys 3, fd, 0, 0
     give n
 
-task compile_source(source: str, len: i32) -> i32:
+task compile_source(source: str, len: i32):
     lock msg: str = "=== Compiling ===\n"
     sys 1, 1, msg, 16
     
