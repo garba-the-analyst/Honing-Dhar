@@ -14,7 +14,8 @@ task compile_source(source: str, len: i32) -> i32:
     lock lmsg: str = "[1/4] Lexical Analysis...\n"
     sys 1, 1, lmsg, 24
     flux tokens: i32 = 0
-    flux tok_count: i32 = len / 4
+    flux tok_count: i32
+    tok_count = len / 4
     lock tmsg: str = "    Tokens: "
     sys 1, 1, tmsg, 10
     sys 1, 2, tok_count, 1

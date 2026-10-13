@@ -13,6 +13,25 @@
  (parser: give 0; symbol: give 0/-1; drivers print fixed banners and
  tok_count=len/4 without calling any pipeline task).
 
+## Errata (found in Phase 1.5, recorded here; this file otherwise frozen)
+
+ The 7/7 claim above is FALSE. The Phase-0 check ran dharc with CWD set so
+ that output.asm landed in Honing/build while NASM assembled a STALE
+ Forge/build/output.asm — every module "passed" vacuously. Re-ran
+ correctly (dharc CWD=Forge) against the canon-baseline compiler:
+   ast/parser/symbol: ASM_OK (true 3/7).
+   main: NASM_FAIL at baseline (`mov [x], len` bare-name immediate —
+     fixed by Forge Phase 1.2b identifier-initializer).
+   codegen: NASM_FAIL at baseline (`text.len` member access — no member
+     support; Phase 3 work, unchanged by Phase 1).
+   lexer: NASM_FAIL at baseline (string-literal condition `word == "task"`
+     emits `cmp rax, "task"` — string comparison unimplemented; Phase 3).
+   compiler: NASM_FAIL at baseline (`len` bare-name, same root cause as
+     main; now additionally DHARC_FAIL on `pull` per Phase 1.5c todo —
+     slated for the Phase-3 fold into main.dhar).
+ Lesson: gate scripts must assert on FRESH output paths (dharc unlinks
+ stale output since Forge Phase 1.5b; verify CWD/build exists first).
+
 ## Shipped-test classification under Stage 0 (strict Alpha §2.2 subset)
 
  PASS (4): hello, test, rigorous, concise (declares flux x first: valid
@@ -37,6 +56,9 @@
 
 ## Reproduce
 
- [Forge]/build/dharc src/<module>.dhar --target=linux &&
- nasm -f elf64 [Forge]/build/output.asm -o /tmp/m.o (expect exit 0;
- proves assembly only, not compilation).
+ Run dharc with CWD=Forge (output is always CWD-relative
+ CWD/build/output.asm); assert the file is fresh before assembling:
+
+  cd [Forge] && ./build/dharc [Honing]/src/<module>.dhar --target=linux &&
+  nasm -f elf64 build/output.asm -o /tmp/m.o (expect exit 0;
+  proves assembly only, not compilation).
