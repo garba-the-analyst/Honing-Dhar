@@ -1,0 +1,15 @@
+; ==============================================================================
+; DHAR IR - Stage 1 module (verbose bootstrap subset only)
+; Status: STUB (Beta §3 backlog). Linear op list between AST and codegen
+; (Spec0 §4: nothing above the IR knows hardware). Ops: const, mov, add,
+; sub, mul, div, jump, branch, call, ret, load/store byte, syscall.
+; This file is valid Stage-0 input and assembles; it lowers nothing yet.
+; ==============================================================================
+
+task ir_emit(op: i32) -> i32:
+    ; TODO(Beta): append op to the op list in a raw buffer, return index.
+    give 0
+
+task core():
+    lock msg: str = "IR loaded\n"
+    sys 1, 1, msg, 10

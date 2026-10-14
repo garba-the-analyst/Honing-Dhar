@@ -1,73 +1,77 @@
 ; ==============================================================================
-; DHAR CODEGEN - No string concatenation
+; DHAR CODEGEN - Stage 1 module (verbose bootstrap subset only)
+; Status: STUB emitters (Beta §3 backlog). Stage 0 has no member access, so
+; `text.len` / `msg.len` cannot be used; lengths are explicit i32 parameters.
+; The sys-based integer dump (`sys 1, 2, v, 1`) is a placeholder emission.
+; This file is valid Stage-0 input and assembles; it generates nothing yet.
 ; ==============================================================================
 
-task cg_emit(text: str):
-    sys 1, 1, text, text.len
+task cg_emit(text: str, tlen: i32):
+    sys 1, 1, text, tlen
 
-task cg_emitln(text: str):
-    cg_emit(text)
-    cg_emit("\n")
+task cg_emitln(text: str, tlen: i32):
+    cg_emit(text, tlen)
+    cg_emit("\n", 1)
 
-task cg_prologue(name: str):
-    cg_emitln(name)
-    cg_emitln(":")
-    cg_emitln("    push rbp")
-    cg_emitln("    mov rbp, rsp")
+task cg_prologue(name: str, nlen: i32):
+    cg_emitln(name, nlen)
+    cg_emitln(":", 1)
+    cg_emitln("    push rbp", 12)
+    cg_emitln("    mov rbp, rsp", 14)
 
 task cg_epilogue():
-    cg_emitln("    mov rsp, rbp")
-    cg_emitln("    pop rbp")
-    cg_emitln("    ret")
+    cg_emitln("    mov rsp, rbp", 14)
+    cg_emitln("    pop rbp", 11)
+    cg_emitln("    ret", 7)
 
 task cg_load_const(v: i32):
     lock s1: str = "    mov rax, "
-    cg_emit(s1)
+    cg_emit(s1, 13)
     sys 1, 2, v, 1
-    cg_emit("\n")
+    cg_emit("\n", 1)
 
 task cg_load_var(offset: i32):
     lock s1: str = "    mov rax, [rbp-"
-    cg_emit(s1)
+    cg_emit(s1, 18)
     sys 1, 2, offset, 1
-    cg_emit("]\n")
+    cg_emit("]\n", 2)
 
 task cg_store_var(offset: i32):
     lock s1: str = "    mov [rbp-"
-    cg_emit(s1)
+    cg_emit(s1, 13)
     sys 1, 2, offset, 1
-    cg_emit("], rax\n")
+    cg_emit("], rax\n", 7)
 
 task cg_jump(label: i32):
     lock s1: str = "    jmp .L"
-    cg_emit(s1)
+    cg_emit(s1, 10)
     sys 1, 2, label, 1
-    cg_emit("\n")
+    cg_emit("\n", 1)
 
 task cg_label(label: i32):
     lock s1: str = ".L"
-    cg_emit(s1)
+    cg_emit(s1, 2)
     sys 1, 2, label, 1
-    cg_emit(":\n")
+    cg_emit(":\n", 2)
 
-task cg_call(name: str):
+task cg_call(name: str, nlen: i32):
     lock s1: str = "    call "
-    cg_emit(s1)
-    cg_emit(name)
-    cg_emit("\n")
+    cg_emit(s1, 9)
+    cg_emit(name, nlen)
+    cg_emit("\n", 1)
 
-task cg_gen_string(msg: str):
-    cg_emitln("    mov rax, 1")
-    cg_emitln("    mov rdi, 1")
+task cg_gen_string(msg: str, mlen: i32):
+    cg_emitln("    mov rax, 1", 14)
+    cg_emitln("    mov rdi, 1", 14)
     lock s1: str = "    mov rsi, "
-    cg_emit(s1)
-    cg_emit(msg)
-    cg_emit("\n")
+    cg_emit(s1, 13)
+    cg_emit(msg, mlen)
+    cg_emit("\n", 1)
     lock s2: str = "    mov rdx, "
-    cg_emit(s2)
-    sys 1, 2, msg.len, 1
-    cg_emit("\n")
-    cg_emitln("    syscall")
+    cg_emit(s2, 13)
+    sys 1, 2, mlen, 1
+    cg_emit("\n", 1)
+    cg_emitln("    syscall", 11)
 
 task core():
     lock msg: str = "Codegen loaded\n"

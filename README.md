@@ -48,14 +48,14 @@ ls -l --time-style=full-iso build/output.asm
 nasm -f elf64 build/output.asm -o /tmp/m.o && ld -m elf_x86_64 -o /tmp/m /tmp/m.o
 ```
 
-Per-module gate TODAY (re-run 2026-10-14): `ast/parser/symbol: ASM_OK (3/7)`; `main/codegen/lexer/compiler: NASM_FAIL or DHARC_FAIL (4/7)` — string-compare conditions, member access, bare-name immediates, `pull`. Assembly is not compilation: modules are stubs/emitters (`parse → give 0`, `symbol add → 0`, drivers print banners).
+Per-module gate 2026-10-14 (dharc = Forge main `4eda9a7`, CWD=Forge, fresh output): **8/8 DHARC-OK + ASM-OK** (`lexer/parser/ast/symbol/typecheck/ir/codegen/main`; spot-checked RUN-OK via `core()` banners). `compiler.dhar` deleted (folded into `main.dhar`); `typecheck`/`ir` created as stubs. All eight are still stubs/emitters — assembly is not compilation, and the Beta §4 `E1==E2` proof is untouched. History: baseline errata was 3/7 (stale-output vacuous pass); Forge fixes healed `main.dhar` (4/7); mechanical pass closed `lexer` (string conditions → stub), `codegen` (`text.len` → explicit lengths).
 
 This repo's `Makefile` only assembles a pre-generated `build/output.asm` (`nasm → dhar_linux`); it does not invoke `dharc` and does not test. `build/` artifacts (`dhar1`, `test`, `output.asm`) are stale snapshots, not proof.
 
 ## 5. Pipeline (scaffolding, NOT working)
 
 Claimed: `lexer` → `parser` → `symbol` → `codegen` → `main` → self-host.
-Actual (`src/*.dhar`, 281 lines): `lexer.dhar` (49: keyword table + `give 0`), `parser.dhar` (9: `give 0`), `symbol.dhar` (15: `new → 0`), `codegen.dhar` (73: `sys`-based emitters only), `ast.dhar` (9: tags), `main.dhar` (79: reads a file, prints `[1/4]Lex…`, never calls pipeline), `compiler.dhar` (47: duplicate driver + 4 inert `pull`s, DHARC_FAILs). No `typecheck`/`ir` yet (canon target: 8 modules, `compiler.dhar` folds into `main.dhar`, all verbose-only).
+Actual (`src/*.dhar`, 8 files): `lexer` (keyword stub `give 0` + banner), `parser` (`give 0`), `ast` (tags), `symbol` (`new → 0`), `typecheck`/`ir` (new stubs), `codegen` (length-explicit `sys`-emitters only), `main` (reads a file, prints `[1/4]Lex…`, never calls pipeline). No member access, no string conditions, no `pull` anywhere — all Strict-Alpha-valid by construction (see `PHASE0_BASELINE.md` addendum).
 
 ## 6. Benchmark (Stage-0 numbers, NOT self-hosted)
 
@@ -65,6 +65,6 @@ There is no Stage-1-generated code to benchmark. `benchmarks/` mirrors Forge's s
 
 ## 7. Roadmap (gated, not dated)
 
-1. **Beta §3 source:** complete 8 verbose-only modules (`typecheck`, `ir` TO CREATE; fold `compiler.dhar`).
+1. **Beta §3 source (mechanical validity DONE 2026-10-14):** 8 verbose-only files exist and assemble (`typecheck`/`ir` created, `compiler.dhar` folded). Next: implement for real, module by module — lexer byte scanner first (raw buffer + `peek` chains; `str` params cannot work), then parser/ast/symbol against it.
 2. **Beta §4 proof:** `Alpha(S)→E1; E1(S)→E2; E1==E2` byte-identical. Entry criterion: every Spec1 construct used has a passing test through the exact pipeline; no banner-only stages.
 3. **Then** Stage 2 (SSA, graph-coloring `r12-r15→r8-r15`, jump tables, `movdqu`), Stage 3 (`std`, `dhar build/test/fmt`). No performance or self-hosting claims until (2) passes.

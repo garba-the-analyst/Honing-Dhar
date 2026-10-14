@@ -1,0 +1,15 @@
+; ==============================================================================
+; DHAR TYPECHECK - Stage 1 module (verbose bootstrap subset only)
+; Status: STUB (Beta §3 backlog). Checks the Strict Alpha §2.2 subset shapes
+; (decls, calls ≤6 args, when/shift/fallback, span/cycle/scan/escape/skip,
+; array/sys/peek/poke shapes) that Stage 0 enforces at parse time.
+; This file is valid Stage-0 input and assembles; it checks nothing yet.
+; ==============================================================================
+
+task typecheck_program() -> i32:
+    ; TODO(Beta): walk AST tags, return 0 on success, line number on error.
+    give 0
+
+task core():
+    lock msg: str = "Typecheck loaded\n"
+    sys 1, 1, msg, 17

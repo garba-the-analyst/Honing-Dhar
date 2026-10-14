@@ -1,48 +1,19 @@
 ; ==============================================================================
-; DHAR LEXER - Simplified for Stage 0 Compatibility
+; DHAR LEXER - Stage 1 module (verbose bootstrap subset only)
+; Status: STUB (Beta §3 backlog). Keyword matching on `str` is NOT expressible
+; in Strict Alpha §2.2: Stage 0 has no str indexing and no string-compare
+; conditions (`when word == "task"` miscompiles to `cmp rax, "task"`), so the
+; real lexer must scan a raw byte buffer with peek + byte chains (TODO Beta).
+; This file is valid Stage-0 input and assembles; it implements nothing yet.
 ; ==============================================================================
 
 task is_keyword(word: str) -> i32:
-    when word == "task": give 1
-    when word == "lock": give 1
-    when word == "flux": give 1
-    when word == "give": give 1
-    when word == "when": give 1
-    when word == "fallback": give 1
-    when word == "span": give 1
-    when word == "choose": give 1
-    when word == "is": give 1
-    when word == "match": give 1
-    when word == "each": give 1
-    when word == "in": give 1
-    when word == "attempt": give 1
-    when word == "rescue": give 1
-    when word == "ensure": give 1
-    when word == "raise": give 1
-    when word == "escape": give 1
-    when word == "skip": give 1
-    when word == "repeat": give 1
-    when word == "until": give 1
-    when word == "shift": give 1
-    when word == "scan": give 1
-    when word == "cycle": give 1
-    when word == "view": give 1
-    when word == "grab": give 1
-    when word == "pull": give 1
-    when word == "expose": give 1
-    when word == "state": give 1
-    when word == "trap": give 1
-    when word == "enforce": give 1
-    when word == "mold": give 1
-    when word == "forge": give 1
-    when word == "gen": give 1
-    when word == "sys": give 1
-    when word == "sysret": give 1
-    when word == "peek": give 1
-    when word == "poke": give 1
+    ; TODO(Beta): byte-level matcher over raw buffer + length.
+    ; A `str` parameter cannot be indexed or compared in Stage 0.
     give 0
 
 task tokenize(src: str, len: i32) -> i32:
+    ; TODO(Beta): fill token tables from raw bytes, return token count.
     give 0
 
 task core():

@@ -42,17 +42,41 @@
    rejection is CORRECT Stage-0 behavior: concise inference/desugar is
    Stage-1 parser work (Beta §2.1, Spec1 §4.3), never Stage-0 input.
 
-## Canon target (Beta §3): 8 modules
+## Canon target (Beta §3): 8 modules — REACHED 2026-10-14 (mechanical pass)
 
- lexer, parser, ast, symbol, typecheck (TO CREATE), ir (TO CREATE),
- codegen, main. compiler.dhar (4 inert pull lines) folds into main.dhar.
- All 8 must be written ONLY in the verbose bootstrap subset above.
+ lexer, parser, ast, symbol, typecheck (CREATED, stub), ir (CREATED, stub),
+ codegen, main. compiler.dhar (4 inert pull lines) DELETED 2026-10-14, folded
+ into main.dhar per this target. All 8 are verbose-bootstrap-subset-only and
+ assemble (see addendum below). Implementation (non-stub behavior) is still
+ TODO throughout; assembly is NOT compilation (Beta §4 gate untouched).
 
 ## Self-host gate (Beta §4): not attempted in Phase 0
 
  S = complete 8-file source; Alpha(S)->E1; E1(S)->E2; E1==E2 byte-for-byte
  ignoring timestamps. Entry criterion: every Spec1 construct has a passing
  test through the exact pipeline; no progress-message-only stages.
+
+## Addendum 2026-10-14 — gate re-run with fixed Stage-0 dharc + mechanical pass
+
+ dharc = Forge main 4eda9a7 (owner-clobber fix). CWD=Forge, fresh output per
+ module (the stale-output trap from the errata above was avoided):
+   lexer/parser/symbol/ast/codegen/main/compiler(old 7):
+     4/7 ASM-OK (parser/symbol/ast/main), lexer NASM-FAIL (`cmp rax,"task"`
+     string-compare conditions), codegen NASM-FAIL (`text.len` member access),
+     compiler DHARC-FAIL (`pull` todo — by design, then deleted).
+   main.dhar healed vs baseline by Forge fixes (no Honing change).
+ Mechanical pass (branch stage1/beta-source, this commit):
+   lexer.dhar: 38 string-compare whens replaced by stub + TODO(Beta) — a `str`
+     parameter cannot be indexed/compared in Strict Alpha, so the real matcher
+     must scan raw bytes (design noted in-file). codegen.dhar: member access
+     removed, lengths are explicit i32 params (one length miscount `14→13`
+     fixed). compiler.dhar deleted. typecheck.dhar + ir.dhar created as
+     assembling stubs.
+   Result: 8/8 DHARC-OK + ASM-OK, 4/4 spot-checked RUN-OK (banners). All eight
+   remain stubs/emitters — the Beta §4 proof has NOT advanced; only subset
+   validity did. Stage-0 acceptance hole found during audit: `when x == "lit"`
+   (string condition) is accepted but miscompiled instead of rejected —
+   recorded as a Forge-side known limitation (outside-subset accept hole).
 
 ## Reproduce
 
